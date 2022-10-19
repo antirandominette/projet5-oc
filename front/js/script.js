@@ -44,4 +44,4 @@ function displayProductsData() {
     .catch(err => console.log(err));
 }
 
-displayProductData();
+displayProductsData();
