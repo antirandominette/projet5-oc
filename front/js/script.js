@@ -3,7 +3,7 @@ let products;
 const productsHtml = document.querySelector('.items');
 
 
-function displayProductsData() {
+function displayProductsData() { // displaying products data
     fetch('http://localhost:3000/api/products')
     .then(res => res.json())
     .then(data => {
