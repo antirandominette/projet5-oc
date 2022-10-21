@@ -1,5 +1,6 @@
 let itemId;
 let product;
+let selectedColorValue;
 
 const itemImg = document.querySelector('.item__img');
 const itemName = document.querySelector('#title');
@@ -21,15 +22,15 @@ function displayProductData() { // displaying product data
     .then(res => res.json())
     .then(data => {
         product= { 
-            colors: data.colors,
-            selectedColor: '',
-            id: data._id,
             name: data.name,
+            selectedColor: '',
+            quantity: 0,
+            colors: data.colors,
             price: data.price,
             img: data.imageUrl,
             description: data.description,
             altTxt: data.altTxt,
-            quantity: 0,
+            id: data._id,
         }
 
         console.log(data);
@@ -57,7 +58,7 @@ function displayProductData() { // displaying product data
 }
 
 function pushCartProduct(cartProducts, cartProduct) { // pushing product to cart
-    const selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;
+    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;
     const quantityValue = parseInt(itemQuantityInput.value);
 
     console.log(selectedColorValue + '\n' + quantityValue);
@@ -83,14 +84,19 @@ function addToCart() { // adding product to cart
         if(localStorage.getItem('cartProducts')) { // checking if cartProducts exists in localStorage
             let cartProducts = JSON.parse(localStorage.getItem('cartProducts'));
             let cartProduct = product;
+            selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;
 
-            if(cartProducts.find(x => x.id == cartProduct.id)) { // checking if product is already in cart
+            if(cartProducts.find(x => x.id == cartProduct.id && x.selectedColor == selectedColorValue)) { // checking if product is already in cart
                 console.log('product already in cart, adding quantity');
 
-                let i = cartProducts.findIndex(x => x.id == cartProduct.id);
-                addQuantity(i, cartProducts); // adding quantity to product in cart
+                let i = cartProducts.findIndex(x => x.id == cartProduct.id); 
+                let j = cartProducts.findIndex(x => x.selectedColor == selectedColorValue); 
 
-                console.log(cartProducts[i].quantity);
+                console.log(`i: ${i} j: ${j}`);
+                
+                i == j ? addQuantity(i, cartProducts) : addQuantity(j, cartProducts); // checking if product is already in cart with same color and adding quantity to the right product
+                
+                console.log(cartProducts[j].quantity);
             }
             else { // product is not in cart, adding product to cart
                 console.log('product not in cart, adding product');
