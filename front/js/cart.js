@@ -16,6 +16,8 @@ function updateLocalStorage() {
 
 function renderArticleElement() {
     cartProducts.forEach(product => {
+        getPriceFromUrl(product);
+
         const cartArticle = document.createElement('article');
         const cartItemImgDiv = document.createElement('div');
         const cartItemImg = document.createElement('img');
@@ -82,6 +84,7 @@ function renderArticleElement() {
     calculateTotalQuantity();
     calculateTotalPrice();
     listenToDeleteButtons();
+    listenToItemQuantityInputs();
 }
 
 function calculateTotalQuantity() {
@@ -101,7 +104,6 @@ function calculateTotalPrice() {
     cartProducts.forEach(product => {
         totalPrice += parseInt(product.price) * parseInt(product.quantity);
     });
-
 
     cartTotalPrice.innerHTML = `${numberFormat.format(totalPrice)}`;
 }
@@ -125,7 +127,21 @@ function listenToDeleteButtons() {
     });
 }
 
+function listenToItemQuantityInputs() {
+    const itemQuantityInputs = document.querySelectorAll('.item__quantity');
 
+    itemQuantityInputs.forEach((input, index) => {
+        input.addEventListener('change', (e) => {
+            const value = e.target.value;
+
+            cartProducts[index].quantity =parseInt(value);
+
+            updateLocalStorage();
+            calculateTotalQuantity();
+            calculateTotalPrice();
+        });
+    });
+}
 
 getProductsFromLocalStorage();
 renderArticleElement();
