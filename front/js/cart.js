@@ -16,8 +16,6 @@ function updateLocalStorage() {
 
 function renderArticleElement() {
     cartProducts.forEach(product => {
-        getPriceFromUrl(product);
-
         const cartArticle = document.createElement('article');
         const cartItemImgDiv = document.createElement('div');
         const cartItemImg = document.createElement('img');

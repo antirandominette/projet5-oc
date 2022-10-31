@@ -57,6 +57,16 @@ function displayProductData() { // displaying product data
     .catch(err => console.log(err));
 }
 
+function removeDefaultColor() { // removing default color from color selector
+    const defaultColor = itemColorSelector.options[0];
+
+    defaultColor.remove();
+}
+
+function setDefaultQuantity() { // setting default quantity to 1
+    itemQuantityInput.value = 1;
+}
+
 function pushCartProduct(cartProducts, cartProduct) { // pushing product to cart
     selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;
     const quantityValue = parseInt(itemQuantityInput.value);
@@ -73,6 +83,7 @@ function pushCartProduct(cartProducts, cartProduct) { // pushing product to cart
 function addQuantity(i, cartProducts) { // adding quantity to product in cart
     cartProducts[i].quantity = parseInt(cartProducts[i].quantity) + parseInt(itemQuantityInput.value);
     localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+
 }
 
 function addToCart() { // adding product to cart
@@ -112,9 +123,14 @@ function addToCart() { // adding product to cart
 
             pushCartProduct(cartProducts, cartProduct);
         }
-    })
+    
+        setDefaultQuantity();
+    });
+
 }
 
 getItemId();
 displayProductData();
+removeDefaultColor();
+setDefaultQuantity();
 addToCart();
