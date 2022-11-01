@@ -12,10 +12,12 @@ function getProductsFromLocalStorage() {
 
 function updateLocalStorage() {
     localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+
+    if(cartProducts.length === 0 ? localStorage.removeItem('cartProducts') : null);
 }
 
 function mapThroughAllProducts() {
-    if(cartProducts) {
+    if(cartProducts ?
         cartProducts.forEach((product, i) => {
             console.log(`called ${i} times`);
             fetch(`http://localhost:3000/api/products/${product.id}`)
@@ -54,13 +56,7 @@ function mapThroughAllProducts() {
                 listenToDeleteButtons(price);
                 listenToItemQuantityInputs(price);
             });
-        });
-    }
-    else {
-        cartItems.innerHTML = `
-            <p>Votre panier est vide</p>
-        `;
-    }
+        }) : displayEmptyCartMsg());
 }
 
 function calculateTotalQuantity() {
@@ -99,6 +95,8 @@ function listenToDeleteButtons(price) {
             updateLocalStorage();
             calculateTotalQuantity();
             calculateTotalPrice(price);
+
+            if(!localStorage.getItem('cartProducts') ? displayEmptyCartMsg() : null);
         });
     });
 }
@@ -117,6 +115,12 @@ function listenToItemQuantityInputs(price) {
             calculateTotalPrice(price);
         });
     });
+}
+
+function displayEmptyCartMsg() {
+    cartItems.innerHTML = `
+        <h2>Votre panier est vide</h2>
+    `;
 }
 
 getProductsFromLocalStorage();
