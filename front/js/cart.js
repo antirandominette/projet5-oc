@@ -14,75 +14,53 @@ function updateLocalStorage() {
     localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
 }
 
-function renderArticleElement() {
-    cartProducts.forEach(product => {
-        const cartArticle = document.createElement('article');
-        const cartItemImgDiv = document.createElement('div');
-        const cartItemImg = document.createElement('img');
-        const cartItemContentDiv = document.createElement('div');
-        const cartItemContentDescriptionDiv = document.createElement('div');
-        const cartItemName = document.createElement('h2');
-        const cartItemColorName = document.createElement('p');
-        const cartItemPrice = document.createElement('p');
-        const cartItemContentSettingsDiv = document.createElement('div');
-        const cartItemContentSettingsQuantityDiv = document.createElement('div');
-        const cartItemQuantityP = document.createElement('p');
-        const cartItemQuantity = document.createElement('input');
-        const cartItemContentSettingsRemoveDiv = document.createElement('div');
-        const cartItemRemoveP = document.createElement('p');
+function mapThroughAllProducts() {
+    if(cartProducts) {
+        cartProducts.forEach((product, i) => {
+            console.log(`called ${i} times`);
+            fetch(`http://localhost:3000/api/products/${product.id}`)
+            .then(res => res.json())
+            .then(data => {
+                let price = data.price;
+                let numberFormat = new Intl.NumberFormat('fr-FR');
+                let formattedPrice = numberFormat.format(price);
 
+                cartItems.innerHTML += `
+                    <article class="cart__item" data-id="${product.id}" data-color="${product.selectedColor}">
+                        <div class="cart__item__img">
+                            <img src="${data.imageUrl}" alt="${data.altTxt}">
+                        </div>
+                        <div class="cart__item__content">
+                            <div class="cart__item__content__description">
+                                <h2>${data.name}</h2>
+                                <p>${product.selectedColor}</p>
+                                <p>${formattedPrice} €</p>
+                            </div>
+                            <div class="cart__item__content__settings">
+                                <div class="cart__item__content__settings__quantity">
+                                    <p>Qté : </p>
+                                    <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantity}">
+                                </div>
+                                <div class="cart__item__content__settings__delete">
+                                    <p class="deleteItem">Supprimer</p>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                `;
 
-        cartArticle.classList.add('cart__item');
-        cartArticle.dataset.id = product.id;
-        cartArticle.dataset.color = product.selectedColor;
-        
-        cartItemImgDiv.classList.add('cart__item__img');
-        
-        cartItemImg.src = product.img;
-        cartItemImg.alt = product.altTxt;
-
-        cartItemContentDiv.classList.add('cart__item__content');
-
-        cartItemContentDescriptionDiv.classList.add('cart__item__content__description');
-
-        cartItemName.innerHTML = product.name;
-
-        cartItemColorName.innerHTML = product.selectedColor;
-
-        cartItemPrice.innerHTML = `${product.price} €`;
-
-        cartItemContentSettingsDiv.classList.add('cart__item__content__settings');
-
-        cartItemContentSettingsQuantityDiv.classList.add('cart__item__content__settings__quantity');
-
-        cartItemQuantityP.innerHTML = 'Qté : ';
-
-        cartItemQuantity.type = 'number';
-        cartItemQuantity.classList.add('item__quantity');
-        cartItemQuantity.name = 'itemQuantity';
-        cartItemQuantity.min = '1';
-        cartItemQuantity.max = '100';
-        cartItemQuantity.value = product.quantity;
-
-        cartItemContentSettingsRemoveDiv.classList.add('cart__item__content__settings__delete');
-
-        cartItemRemoveP.classList.add('deleteItem');
-        cartItemRemoveP.innerHTML = 'Supprimer';
-
-        cartItems.append(cartArticle);
-        cartArticle.append(cartItemImgDiv, cartItemContentDiv);
-        cartItemImgDiv.append(cartItemImg);
-        cartItemContentDiv.append(cartItemContentDescriptionDiv, cartItemContentSettingsDiv);
-        cartItemContentDescriptionDiv.append(cartItemName, cartItemColorName, cartItemPrice);
-        cartItemContentSettingsDiv.append(cartItemContentSettingsQuantityDiv, cartItemContentSettingsRemoveDiv);
-        cartItemContentSettingsQuantityDiv.append(cartItemQuantityP, cartItemQuantity);
-        cartItemContentSettingsRemoveDiv.append(cartItemRemoveP);
-    });
-
-    calculateTotalQuantity();
-    calculateTotalPrice();
-    listenToDeleteButtons();
-    listenToItemQuantityInputs();
+                calculateTotalPrice(price);
+                calculateTotalQuantity();
+                listenToDeleteButtons(price);
+                listenToItemQuantityInputs(price);
+            });
+        });
+    }
+    else {
+        cartItems.innerHTML = `
+            <p>Votre panier est vide</p>
+        `;
+    }
 }
 
 function calculateTotalQuantity() {
@@ -95,18 +73,18 @@ function calculateTotalQuantity() {
     cartTotalQuantity.innerHTML = totalQuantity;
 }
 
-function calculateTotalPrice() {
+function calculateTotalPrice(price) {
     let totalPrice = 0;
     let numberFormat = new Intl.NumberFormat('fr-FR');
 
     cartProducts.forEach(product => {
-        totalPrice += parseInt(product.price) * parseInt(product.quantity);
+        totalPrice += parseInt(price) * parseInt(product.quantity);
     });
 
     cartTotalPrice.innerHTML = `${numberFormat.format(totalPrice)}`;
 }
 
-function listenToDeleteButtons() {
+function listenToDeleteButtons(price) {
     const deleteButtons = document.querySelectorAll('.deleteItem');
 
     deleteButtons.forEach((button, index) => {
@@ -120,26 +98,26 @@ function listenToDeleteButtons() {
 
             updateLocalStorage();
             calculateTotalQuantity();
-            calculateTotalPrice();
+            calculateTotalPrice(price);
         });
     });
 }
 
-function listenToItemQuantityInputs() {
-    const itemQuantityInputs = document.querySelectorAll('.item__quantity');
+function listenToItemQuantityInputs(price) {
+    const itemQuantityInputs = document.querySelectorAll('.itemQuantity');
 
     itemQuantityInputs.forEach((input, index) => {
         input.addEventListener('change', (e) => {
             const value = e.target.value;
 
-            cartProducts[index].quantity =parseInt(value);
+            cartProducts[index].quantity = parseInt(value);
 
             updateLocalStorage();
             calculateTotalQuantity();
-            calculateTotalPrice();
+            calculateTotalPrice(price);
         });
     });
 }
 
 getProductsFromLocalStorage();
-renderArticleElement();
+mapThroughAllProducts();

@@ -1,5 +1,6 @@
 let itemId;
 let product;
+let storedProduct;
 let selectedColorValue;
 
 const itemImg = document.querySelector('.item__img');
@@ -17,20 +18,29 @@ function getItemId (){ // getting item id from url
     console.log(itemId);
 }
 
+function fetchStoredProductData() {
+    fetch(`http://localhost:3000/api/products/${itemId}`) 
+    .then(res => res.json())
+    .then(data => {
+        storedProduct= { 
+            selectedColor: '',
+            quantity: 0,
+            id: data._id,
+        }
+    });
+}
+
 function displayProductData() { // displaying product data
     fetch(`http://localhost:3000/api/products/${itemId}`) // fetching product data
     .then(res => res.json())
     .then(data => {
         product= { 
             name: data.name,
-            selectedColor: '',
-            quantity: 0,
             colors: data.colors,
             price: data.price,
             img: data.imageUrl,
             description: data.description,
             altTxt: data.altTxt,
-            id: data._id,
         }
 
         console.log(data);
@@ -47,6 +57,7 @@ function displayProductData() { // displaying product data
         }
 
         itemImgElement.src = `${product.img}`;
+        itemImgElement.alt = `${product.altTxt}`;
 
         itemName.innerHTML = `${product.name}`;
         itemPrice.innerHTML = `${product.price}`;
@@ -94,7 +105,7 @@ function addToCart() { // adding product to cart
 
         if(localStorage.getItem('cartProducts')) { // checking if cartProducts exists in localStorage
             let cartProducts = JSON.parse(localStorage.getItem('cartProducts'));
-            let cartProduct = product;
+            let cartProduct = storedProduct;
             selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;
 
             if(cartProducts.find(x => x.id == cartProduct.id && x.selectedColor == selectedColorValue)) { // checking if product is already in cart
@@ -119,7 +130,7 @@ function addToCart() { // adding product to cart
         }
         else { // if cartProducts doesn't exist in localStorage
             let cartProducts = [];
-            let cartProduct = product;
+            let cartProduct = storedProduct;
 
             pushCartProduct(cartProducts, cartProduct);
         }
@@ -130,6 +141,7 @@ function addToCart() { // adding product to cart
 }
 
 getItemId();
+fetchStoredProductData();
 displayProductData();
 removeDefaultColor();
 setDefaultQuantity();
