@@ -19,7 +19,6 @@ function updateLocalStorage() {
 function mapThroughAllProducts() {
     if(cartProducts ?
         cartProducts.forEach((product, i) => {
-            console.log(`called ${i} times`);
             fetch(`http://localhost:3000/api/products/${product.id}`)
             .then(res => res.json())
             .then(data => {
@@ -81,6 +80,7 @@ function calculateTotalPrice(price) {
 }
 
 function listenToDeleteButtons(price) {
+    // INDEX IS CAUSING ERROR
     const deleteButtons = document.querySelectorAll('.deleteItem');
 
     deleteButtons.forEach((button, index) => {
@@ -91,12 +91,13 @@ function listenToDeleteButtons(price) {
     
             article.remove();
             cartProducts.splice(index, 1);
+            console.log(cartProducts);
 
             updateLocalStorage();
             calculateTotalQuantity();
             calculateTotalPrice(price);
 
-            if(!localStorage.getItem('cartProducts') ? displayEmptyCartMsg() : null);
+            if(!localStorage.getItem('cartProducts') ? displayEmptyCartMsg() : console.log(`Il y a encore des produits dans le panier ${ cartProducts.length }`));
         });
     });
 }
