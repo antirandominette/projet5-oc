@@ -80,17 +80,21 @@ function calculateTotalPrice(price) {
 }
 
 function listenToDeleteButtons(price) {
-    // INDEX IS CAUSING ERROR
     const deleteButtons = document.querySelectorAll('.deleteItem');
 
-    deleteButtons.forEach((button, index) => {
+    deleteButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
     
             const article = e.target.closest('article');
-    
+            const productId = article.dataset.id;
+            const productColor = article.dataset.color;
+
+            // determine the product to delete via its id and color and store it in a variable
+            const productToDelete = cartProducts.findIndex(e => e.id === productId && e.selectedColor === productColor);
+            
+            cartProducts.splice(productToDelete, 1);
             article.remove();
-            cartProducts.splice(index, 1);
             console.log(cartProducts);
 
             updateLocalStorage();
@@ -122,6 +126,18 @@ function displayEmptyCartMsg() {
     cartItems.innerHTML = `
         <h2>Votre panier est vide</h2>
     `;
+}
+
+function listenToOrderButton() {
+    const orderButton = document.queryselector("order");
+
+    orderButton.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        if(cartProducts) {
+            fetch(`http://localhost:3000/api/products/order${id}`, {})
+        }
+    })
 }
 
 getProductsFromLocalStorage();
