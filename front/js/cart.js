@@ -140,5 +140,57 @@ function listenToOrderButton() {
     })
 }
 
+/**
+ *
+ * Expects request to contain:
+ * contact: {
+ *   firstName: string,
+ *   lastName: string,
+ *   address: string,
+ *   city: string,
+ *   email: string
+ * }
+ * products: [string] <-- array of product _id
+ *
+ */
+
+function sendOrder() {
+    orderButton = document.querySelector("#order");
+    
+    orderButton.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        const contact = {
+            firstName: document.querySelector('#firstName').value,
+            lastName: document.querySelector('#lastName').value,
+            address: document.querySelector('#address').value,
+            city: document.querySelector('#city').value,
+            email: document.querySelector('#email').value
+        }
+
+        const products = [];
+
+        cartProducts.forEach(product => {
+            products.push(product.id);
+        });
+
+        console.log(products);
+
+        fetch('http://localhost:3000/api/products/order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ contact, products })
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+        })
+    });
+}
+
+
 getProductsFromLocalStorage();
 mapThroughAllProducts();
+sendOrder();
