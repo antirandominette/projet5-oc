@@ -140,20 +140,6 @@ function listenToOrderButton() {
     })
 }
 
-/**
- *
- * Expects request to contain:
- * contact: {
- *   firstName: string,
- *   lastName: string,
- *   address: string,
- *   city: string,
- *   email: string
- * }
- * products: [string] <-- array of product _id
- *
- */
-
 function sendOrder() {
     orderButton = document.querySelector("#order");
     
@@ -186,6 +172,7 @@ function sendOrder() {
         .then(res => res.json())
         .then(data => {
             console.log(data);
+            window.location.replace(`confirmation.html?orderId=${data.orderId}`)
         })
     });
 }
@@ -193,4 +180,4 @@ function sendOrder() {
 
 getProductsFromLocalStorage();
 mapThroughAllProducts();
-sendOrder();
+sendOrder(); 
