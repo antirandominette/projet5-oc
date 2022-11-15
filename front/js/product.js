@@ -15,11 +15,14 @@ function getItemId (){ // getting item id from url
     const urlParams = new URLSearchParams(url);
     
     itemId = urlParams.get('id');
-    console.log(itemId);
+
+    fetchStoredProductData();
+
+    console.log(`%cThe item id is : %c ${itemId} `, 'font-weight: bold; background-color: black', 'color: green; font-weight: bold; background-color: black;'); 
 }
 
-function fetchStoredProductData() {
-    fetch(`http://localhost:3000/api/products/${itemId}`) 
+async function fetchStoredProductData() {
+    await fetch(`http://localhost:3000/api/products/${itemId}`) 
     .then(res => res.json())
     .then(data => {
         storedProduct= { 
@@ -28,22 +31,25 @@ function fetchStoredProductData() {
             id: data._id,
         }
     });
+
+    displayProductData();
 }
 
-function displayProductData() { // displaying product data
-    fetch(`http://localhost:3000/api/products/${itemId}`) // fetching product data
+async function displayProductData() { // displaying product data
+    await fetch(`http://localhost:3000/api/products/${itemId}`) // fetching product data
     .then(res => res.json())
     .then(data => {
         product= { 
             name: data.name,
-            colors: data.colors,
             price: data.price,
             img: data.imageUrl,
             description: data.description,
             altTxt: data.altTxt,
+            colors: data.colors,
         }
 
-        console.log(data);
+        console.log(`%cThe product data is : `, 'font-weight: bold; background-color: black; color: orange;'); // displaying product data in console
+        console.table(product);
 
         let itemImgElement = document.createElement('img');
 
@@ -66,6 +72,10 @@ function displayProductData() { // displaying product data
         itemImg.appendChild(itemImgElement);
     })
     .catch(err => console.log(err));
+
+    removeDefaultColor();
+    setDefaultQuantity();
+    listenToAddToCartButton();
 }
 
 function removeDefaultColor() { // removing default color from color selector
@@ -79,70 +89,66 @@ function setDefaultQuantity() { // setting default quantity to 1
 }
 
 function pushCartProduct(cartProducts, cartProduct) { // pushing product to cart
-    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;
-    const quantityValue = parseInt(itemQuantityInput.value);
+    // adding selected color and quantity to product
 
-    console.log(selectedColorValue + '\n' + quantityValue);
+    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  // getting selected color value
+    const quantityValue = parseInt(itemQuantityInput.value); // getting quantity value
 
-    cartProduct.selectedColor = selectedColorValue;
-    cartProduct.quantity = quantityValue;
+
+    cartProduct.selectedColor = selectedColorValue; 
+    cartProduct.quantity = quantityValue; 
 
     cartProducts.push(cartProduct);
     localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+
+    console.log(`selectedColor : ${selectedColorValue}, addedQuantity : ${quantityValue}`);
+    console.log({cartProducts});
 }
 
 function addQuantity(i, cartProducts) { // adding quantity to product in cart
     cartProducts[i].quantity = parseInt(cartProducts[i].quantity) + parseInt(itemQuantityInput.value);
+    
     localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
-
 }
 
-function addToCart() { // adding product to cart
-
+function listenToAddToCartButton() { // adding product to cart
     const addToCartBtn = document.querySelector('#addToCart');
     addToCartBtn.addEventListener('click', (e) => {
         e.preventDefault();
 
-        if(localStorage.getItem('cartProducts')) { // checking if cartProducts exists in localStorage
-            let cartProducts = JSON.parse(localStorage.getItem('cartProducts'));
-            let cartProduct = storedProduct;
-            selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;
-
-            if(cartProducts.find(x => x.id == cartProduct.id && x.selectedColor == selectedColorValue)) { // checking if product is already in cart
-                console.log('product already in cart, adding quantity');
-
-                let i = cartProducts.findIndex(x => x.id == cartProduct.id); 
-                let j = cartProducts.findIndex(x => x.selectedColor == selectedColorValue); 
-
-                console.log(`i: ${i} j: ${j}`);
-                
-                i == j ? addQuantity(i, cartProducts) : addQuantity(j, cartProducts); // checking if product is already in cart with same color and adding quantity to the right product
-                
-                console.log(cartProducts[j].quantity);
-            }
-            else { // product is not in cart, adding product to cart
-                console.log('product not in cart, adding product');
-
-                pushCartProduct(cartProducts, cartProduct); 
-
-                console.log(cartProducts);
-            }
-        }
-        else { // if cartProducts doesn't exist in localStorage
-            let cartProducts = [];
-            let cartProduct = storedProduct;
-
-            pushCartProduct(cartProducts, cartProduct);
-        }
+        if(localStorage.getItem('cartProducts') ? addProductToCart() : createLocalStorage());
     
         setDefaultQuantity();
     });
+}
+
+function addProductToCart() {
+    let cartProducts = JSON.parse(localStorage.getItem('cartProducts')); // getting cartProducts from localStorage
+    let cartProduct = storedProduct; // getting product from localStorage
+    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text; // getting selected color value
+
+    if(cartProducts.find(x => x.id == cartProduct.id && x.selectedColor == selectedColorValue) ? productIsAlreadyInCart(cartProducts, cartProduct) : pushCartProduct(cartProducts, cartProduct)); // checking if product is already in cart
+}
+
+function createLocalStorage() {
+    let cartProducts = [];
+    let cartProduct = storedProduct;
+
+    pushCartProduct(cartProducts, cartProduct);
 
 }
 
+function productIsAlreadyInCart(cartProducts, cartProduct) {
+    console.log('product already in cart, adding quantity');
+
+    let i = cartProducts.findIndex(x => x.id == cartProduct.id); 
+    let j = cartProducts.findIndex(x => x.selectedColor == selectedColorValue); 
+
+    console.log(`id index: ${i} selectedColorIndex: ${j}`);
+    
+    i == j ? addQuantity(i, cartProducts) : addQuantity(j, cartProducts); // checking if product is already in cart with same color and adding quantity to the right product
+    
+    console.log(cartProducts[j].quantity);
+}
+
 getItemId();
-fetchStoredProductData();
-displayProductData();
-removeDefaultColor();
-setDefaultQuantity();
-addToCart();
