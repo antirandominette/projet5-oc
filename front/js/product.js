@@ -3,6 +3,7 @@ let product;
 let storedProduct;
 let selectedColorValue;
 
+const pageTitle = document.querySelector('title');
 const itemImg = document.querySelector('.item__img');
 const itemName = document.querySelector('#title');
 const itemPrice = document.querySelector('#price');
@@ -16,29 +17,21 @@ function getItemId (){ // getting item id from url
     
     itemId = urlParams.get('id');
 
-    fetchStoredProductData();
+    displayProductData();
 
     console.log(`%cThe item id is : %c ${itemId} `, 'font-weight: bold; background-color: black', 'color: green; font-weight: bold; background-color: black;'); 
-}
-
-async function fetchStoredProductData() {
-    await fetch(`http://localhost:3000/api/products/${itemId}`) 
-    .then(res => res.json())
-    .then(data => {
-        storedProduct= { 
-            selectedColor: '',
-            quantity: 0,
-            id: data._id,
-        }
-    });
-
-    displayProductData();
 }
 
 async function displayProductData() { // displaying product data
     await fetch(`http://localhost:3000/api/products/${itemId}`) // fetching product data
     .then(res => res.json())
     .then(data => {
+        storedProduct = {
+            selectedColor: '',
+            quantity: 0,
+            id: data._id,
+        }
+        
         product= { 
             name: data.name,
             price: data.price,
@@ -62,6 +55,8 @@ async function displayProductData() { // displaying product data
             itemColorSelector.appendChild(itemColorOption);
         }
 
+        pageTitle.innerHTML = `${product.name}`;
+
         itemImgElement.src = `${product.img}`;
         itemImgElement.alt = `${product.altTxt}`;
 
@@ -73,24 +68,11 @@ async function displayProductData() { // displaying product data
     })
     .catch(err => console.log(err));
 
-    removeDefaultColor();
     setDefaultQuantity();
     listenToAddToCartButton();
 }
 
-function removeDefaultColor() { // removing default color from color selector
-    const defaultColor = itemColorSelector.options[0];
-
-    defaultColor.remove();
-}
-
-function setDefaultQuantity() { // setting default quantity to 1
-    itemQuantityInput.value = 1;
-}
-
 function pushCartProduct(cartProducts, cartProduct) { // pushing product to cart
-    // adding selected color and quantity to product
-
     selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  // getting selected color value
     const quantityValue = parseInt(itemQuantityInput.value); // getting quantity value
 

@@ -38,6 +38,8 @@ function mapThroughAllProducts() {
             let price = item.price;
             let formattedPrice = numberFormat.format(price);
 
+            // insertAdjacentHTML
+
             cartItems.innerHTML += `
                 <article class="cart__item" data-id="${item._id}" data-color="${product.selectedColor}">
                     <div class="cart__item__img">
