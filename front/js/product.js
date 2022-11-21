@@ -26,13 +26,13 @@ async function displayProductData() { // displaying product data
     await fetch(`http://localhost:3000/api/products/${itemId}`) // fetching product data
     .then(res => res.json())
     .then(data => {
-        storedProduct = {
+        storedProduct = { // create object that will be stored in localStorage
             selectedColor: '',
             quantity: 0,
             id: data._id,
         }
         
-        product= { 
+        product= { // creating product object to display data
             name: data.name,
             price: data.price,
             img: data.imageUrl,
@@ -68,39 +68,18 @@ async function displayProductData() { // displaying product data
     })
     .catch(err => console.log(err));
 
-    setDefaultQuantity();
     listenToAddToCartButton();
-}
-
-function pushCartProduct(cartProducts, cartProduct) { // pushing product to cart
-    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  // getting selected color value
-    const quantityValue = parseInt(itemQuantityInput.value); // getting quantity value
-
-
-    cartProduct.selectedColor = selectedColorValue; 
-    cartProduct.quantity = quantityValue; 
-
-    cartProducts.push(cartProduct);
-    localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
-
-    console.log(`selectedColor : ${selectedColorValue}, addedQuantity : ${quantityValue}`);
-    console.log({cartProducts});
-}
-
-function addQuantity(i, cartProducts) { // adding quantity to product in cart
-    cartProducts[i].quantity = parseInt(cartProducts[i].quantity) + parseInt(itemQuantityInput.value);
-    
-    localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
 }
 
 function listenToAddToCartButton() { // adding product to cart
     const addToCartBtn = document.querySelector('#addToCart');
+
     addToCartBtn.addEventListener('click', (e) => {
         e.preventDefault();
 
         if(localStorage.getItem('cartProducts') ? addProductToCart() : createLocalStorage());
-    
-        setDefaultQuantity();
+
+        itemQuantityInput.value = 1; // resetting quantity input value
     });
 }
 
@@ -109,28 +88,61 @@ function addProductToCart() {
     let cartProduct = storedProduct; // getting product from localStorage
     selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text; // getting selected color value
 
-    if(cartProducts.find(x => x.id == cartProduct.id && x.selectedColor == selectedColorValue) ? productIsAlreadyInCart(cartProducts, cartProduct) : pushCartProduct(cartProducts, cartProduct)); // checking if product is already in cart
+    // checking if product is already in cart
+    (cartProducts.find(x => x.id == cartProduct.id && x.selectedColor == selectedColorValue) ? 
+        productIsAlreadyInCart(cartProducts, cartProduct) 
+        : 
+        pushCartProductToLocalStorage(cartProducts, cartProduct)
+    ); 
 }
 
 function createLocalStorage() {
     let cartProducts = [];
     let cartProduct = storedProduct;
 
-    pushCartProduct(cartProducts, cartProduct);
-
+    pushCartProductToLocalStorage(cartProducts, cartProduct);
 }
 
 function productIsAlreadyInCart(cartProducts, cartProduct) {
-    console.log('product already in cart, adding quantity');
-
-    let i = cartProducts.findIndex(x => x.id == cartProduct.id); 
-    let j = cartProducts.findIndex(x => x.selectedColor == selectedColorValue); 
-
-    console.log(`id index: ${i} selectedColorIndex: ${j}`);
+    let i = cartProducts.findIndex(x => x.id == cartProduct.id); // getting index of product in cart
+    let j = cartProducts.findIndex(x => x.selectedColor == selectedColorValue); // getting index of selectedColor in cart
     
     i == j ? addQuantity(i, cartProducts) : addQuantity(j, cartProducts); // checking if product is already in cart with same color and adding quantity to the right product
     
-    console.log(cartProducts[j].quantity);
+    console.log(`product quantity after verification is : ${cartProducts[j].quantity}`);
+}
+
+function pushCartProductToLocalStorage(cartProducts, cartProduct) { // pushing product to cart
+    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  // getting selected color value
+    const quantityValue = parseInt(itemQuantityInput.value); // getting quantity value
+
+    if(checkIfQuantityIsValid(quantityValue) && (selectedColorValue != '--SVP, choisissez une couleur --')) { // checking if quantity is between 1 and 100 and if color is selected
+        cartProduct.selectedColor = selectedColorValue; 
+        cartProduct.quantity = quantityValue; 
+        cartProducts.push(cartProduct);
+
+        localStorage.setItem('cartProducts', JSON.stringify(cartProducts)); // pushing product to localStorage
+    }
+    else {
+        console.log(`quantity and/or selectedColor are invalid : ${quantityValue}, ${selectedColorValue}`);
+    }
+}
+
+function addQuantity(i, cartProducts) { // adding quantity to product in cart
+    const valueToCheck = parseInt(itemQuantityInput.value);
+
+    if(checkIfQuantityIsValid(valueToCheck) && ((cartProducts[i].quantity + valueToCheck <= 100) && (cartProducts[i].quantity + valueToCheck >= 1))) { 
+        cartProducts[i].quantity = parseInt(cartProducts[i].quantity) + parseInt(itemQuantityInput.value);
+    
+        localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+    }
+    else {
+        console.log(`quantity limit reached, you are trying to add : ${valueToCheck}`);
+    }
+}
+
+function checkIfQuantityIsValid(quantity) {
+    return (quantity > 0 && quantity <= 100);
 }
 
 getItemId();
