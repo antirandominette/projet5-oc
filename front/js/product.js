@@ -10,11 +10,7 @@ const itemPrice = document.querySelector('#price');
 const itemDescription = document.querySelector('#description');
 const itemColorSelector = document.querySelector('#colors');
 const itemQuantityInput = document.querySelector('#quantity');
-const colorOptionsDiv = document.querySelector('.item__content__settings__color');
-const colorErrorMsg = document.createElement('p');
 
-colorErrorMsg.innerHTML = `Veuillez choisir une couleur`;
-colorOptionsDiv.appendChild(colorErrorMsg);
 
 function getItemId (){ // getting item id from url
     const url = window.location.search;
@@ -114,14 +110,14 @@ function productIsAlreadyInCart(cartProducts, cartProduct) {
     
     i == j ? addQuantity(i, cartProducts) : addQuantity(j, cartProducts); // checking if product is already in cart with same color and adding quantity to the right product
     
-    console.log(`product quantity after verification is : ${cartProducts[j].quantity}`);
+    console.log(`Quantity for ${cartProducts[j].id} in ${cartProducts[j].selectedColor} : ${cartProducts[j].quantity}`);
 }
 
 function pushCartProductToLocalStorage(cartProducts, cartProduct) { // pushing product to cart
     selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  // getting selected color value
     const quantityValue = parseInt(itemQuantityInput.value); // getting quantity value
 
-    if(checkIfQuantityIsValid(quantityValue) && checkIfColorIsSelected(selectedColorValue)) { // checking if quantity is between 1 and 100 and if color is selected
+    if(checkIfQuantityIsValid(quantityValue) && checkIfColorIsSelected(selectedColorValue)) { // checking if quantity is between 1 and 100 and if a color is selected
         cartProduct.selectedColor = selectedColorValue; 
         cartProduct.quantity = quantityValue; 
         cartProducts.push(cartProduct);
@@ -134,15 +130,16 @@ function pushCartProductToLocalStorage(cartProducts, cartProduct) { // pushing p
 }
 
 function addQuantity(i, cartProducts) { // adding quantity to product in cart
-    const valueToCheck = parseInt(itemQuantityInput.value);
+    const inputQuantity = parseInt(itemQuantityInput.value);
+    const totalQuantity = cartProducts[i].quantity + inputQuantity;
 
-    if(checkIfQuantityIsValid(valueToCheck) && ((cartProducts[i].quantity + valueToCheck <= 100) && (cartProducts[i].quantity + valueToCheck >= 1))) { 
+    if(checkIfQuantityIsValid(inputQuantity) && (totalQuantity > 0 && totalQuantity <= 100)) { 
         cartProducts[i].quantity = parseInt(cartProducts[i].quantity) + parseInt(itemQuantityInput.value);
     
         localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
     }
     else {
-        console.log(`quantity limit reached, you are trying to add : ${valueToCheck}`);
+        console.log(`quantity limit reached, you are trying to add : ${inputQuantity}`);
     }
 }
 
@@ -154,11 +151,27 @@ function checkIfColorIsSelected(selectedColor) {
     return (selectedColor != '--SVP, choisissez une couleur --');
 }
 
-function listenToColorSelector() {
-    itemColorSelector.addEventListener('change', (e) => {
-        if((e.target.value == '') ? colorErrorMsg.style.display = 'block': colorErrorMsg.style.display = 'none');
+function displayErrorMsgs() { // displaying error messages
+    const colorOptionsDiv = document.querySelector('.item__content__settings__color'); 
+    const quantityInputDiv = document.querySelector('.item__content__settings__quantity');
+    const colorErrorMsg = document.createElement('p'); 
+    const quantityErrorMsg = document.createElement('p');
+
+    colorErrorMsg.innerHTML = `Veuillez choisir une couleur`; 
+    colorOptionsDiv.appendChild(colorErrorMsg);
+
+    quantityErrorMsg.innerHTML = `Veuillez entrer un nombre entre 1 et 100`;
+    quantityInputDiv.appendChild(quantityErrorMsg);
+    quantityErrorMsg.style.display = 'none'; // message is showing by default so we hide it
+
+    itemColorSelector.addEventListener('change', (e) => { // displaying error message if color is not selected
+        ((e.target.value == '') ? colorErrorMsg.style.display = 'block': colorErrorMsg.style.display = 'none');
+    });
+
+    itemQuantityInput.addEventListener('change', (e) => { // displaying error message if quantity is not between 1 and 100
+        ((e.target.value < 1 || e.target.value > 100) ? quantityErrorMsg.style.display = 'block' : quantityErrorMsg.style.display = 'none');
     });
 }
 
 getItemId();
-listenToColorSelector();
+displayErrorMsgs();
