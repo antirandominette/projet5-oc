@@ -10,6 +10,11 @@ const itemPrice = document.querySelector('#price');
 const itemDescription = document.querySelector('#description');
 const itemColorSelector = document.querySelector('#colors');
 const itemQuantityInput = document.querySelector('#quantity');
+const colorOptionsDiv = document.querySelector('.item__content__settings__color');
+const colorErrorMsg = document.createElement('p');
+
+colorErrorMsg.innerHTML = `Veuillez choisir une couleur`;
+colorOptionsDiv.appendChild(colorErrorMsg);
 
 function getItemId (){ // getting item id from url
     const url = window.location.search;
@@ -116,7 +121,7 @@ function pushCartProductToLocalStorage(cartProducts, cartProduct) { // pushing p
     selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  // getting selected color value
     const quantityValue = parseInt(itemQuantityInput.value); // getting quantity value
 
-    if(checkIfQuantityIsValid(quantityValue) && (selectedColorValue != '--SVP, choisissez une couleur --')) { // checking if quantity is between 1 and 100 and if color is selected
+    if(checkIfQuantityIsValid(quantityValue) && checkIfColorIsSelected(selectedColorValue)) { // checking if quantity is between 1 and 100 and if color is selected
         cartProduct.selectedColor = selectedColorValue; 
         cartProduct.quantity = quantityValue; 
         cartProducts.push(cartProduct);
@@ -145,4 +150,15 @@ function checkIfQuantityIsValid(quantity) {
     return (quantity > 0 && quantity <= 100);
 }
 
+function checkIfColorIsSelected(selectedColor) {
+    return (selectedColor != '--SVP, choisissez une couleur --');
+}
+
+function listenToColorSelector() {
+    itemColorSelector.addEventListener('change', (e) => {
+        if((e.target.value == '') ? colorErrorMsg.style.display = 'block': colorErrorMsg.style.display = 'none');
+    });
+}
+
 getItemId();
+listenToColorSelector();
