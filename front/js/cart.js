@@ -125,15 +125,21 @@ function listenToDeleteButtons(price) {
 function listenToItemQuantityInputs(price) {
     const itemQuantityInputs = document.querySelectorAll('.itemQuantity');
 
-    itemQuantityInputs.forEach((input, index) => {
+    itemQuantityInputs.forEach((input, index) => { 
         input.addEventListener('change', (e) => {
-            const value = e.target.value;
+            let inputValue = parseInt(e.target.value);
 
-            cartProducts[index].quantity = parseInt(value);
+            if(inputValue > 0 && inputValue <= 100) { // check if the input value is between 1 and 100
+                cartProducts[index].quantity = inputValue;
+                
+                updateLocalStorage();
+                calculateTotalQuantity();
+                calculateTotalPrice(price);
+            }
+            else { // if the input value is not between 1 and 100, set the value to the product quantity before modification
+                e.target.value = cartProducts[index].quantity;
+            }
 
-            updateLocalStorage();
-            calculateTotalQuantity();
-            calculateTotalPrice(price);
         });
     });
 }

@@ -10,7 +10,9 @@ const itemPrice = document.querySelector('#price');
 const itemDescription = document.querySelector('#description');
 const itemColorSelector = document.querySelector('#colors');
 const itemQuantityInput = document.querySelector('#quantity');
-
+const confirmationMsgContainer = document.createElement('div');
+const defaultStyle = "position: absolute; padding: 0 10px; top: 110%; background: transparent; width: fit-content; height: fit-content; opacity: 0; transition: opacity 0.5s ease-in-out;";
+const confirmationMsg = document.createElement('p');
 
 function getItemId (){ // getting item id from url
     const url = window.location.search;
@@ -87,6 +89,7 @@ function listenToAddToCartButton() { // adding product to cart
 function addProductToCart() {
     let cartProducts = JSON.parse(localStorage.getItem('cartProducts')); // getting cartProducts from localStorage
     let cartProduct = storedProduct; // getting product from localStorage
+    
     selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text; // getting selected color value
 
     // checking if product is already in cart
@@ -123,6 +126,8 @@ function pushCartProductToLocalStorage(cartProducts, cartProduct) { // pushing p
         cartProducts.push(cartProduct);
 
         localStorage.setItem('cartProducts', JSON.stringify(cartProducts)); // pushing product to localStorage
+
+        displayConfirmationMsg();
     }
     else {
         console.log(`quantity and/or selectedColor are invalid : ${quantityValue}, ${selectedColorValue}`);
@@ -137,6 +142,7 @@ function addQuantity(i, cartProducts) { // adding quantity to product in cart
         cartProducts[i].quantity = parseInt(cartProducts[i].quantity) + parseInt(itemQuantityInput.value);
     
         localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+        displayConfirmationMsg();
     }
     else {
         console.log(`quantity limit reached, you are trying to add : ${inputQuantity}`);
@@ -173,5 +179,29 @@ function displayErrorMsgs() { // displaying error messages
     });
 }
 
+function createConfirmationMsg() {
+    const addButtonContainer = document.querySelector('.item__content__addButton');
+
+    confirmationMsgContainer.classList.add('confirmationMsgContainer');
+    confirmationMsgContainer.style.cssText = defaultStyle;
+    confirmationMsgContainer.appendChild(confirmationMsg);
+    
+    addButtonContainer.appendChild(confirmationMsgContainer);
+    addButtonContainer.style.cssText = "position: relative;";
+}
+
+function displayConfirmationMsg() {
+    confirmationMsg.innerHTML = `Vous avez ajouté ${itemQuantityInput.value} exemplaire(s) à votre panier !`;
+
+    setTimeout(() => {
+        confirmationMsgContainer.style.cssText = `${defaultStyle} opacity: 1;`;
+
+        setTimeout(() => {
+            confirmationMsgContainer.style.cssText = `${defaultStyle} opacity: 0;`;
+        }, 2000);
+    }, 100);  
+}
+
 getItemId();
 displayErrorMsgs();
+createConfirmationMsg();
