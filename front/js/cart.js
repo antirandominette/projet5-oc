@@ -103,7 +103,7 @@ function listenToDeleteButtons(price) {
             const productId = article.dataset.id;
             const productColor = article.dataset.color;
 
-            // determine the product to delete via its id and color and store it in a variable
+            // determine the product to delete via its id and color
             const productToDelete = cartProducts.findIndex(x => x.id === productId && x.selectedColor === productColor);
             
             cartProducts.splice(productToDelete, 1);
@@ -129,8 +129,14 @@ function listenToItemQuantityInputs(price) {
         input.addEventListener('change', (e) => {
             let inputValue = parseInt(e.target.value);
 
+            const article = e.target.closest('article');
+            const productId = article.dataset.id;
+            const productColor = article.dataset.color;
+
             if(inputValue > 0 && inputValue <= 100) { // check if the input value is between 1 and 100
-                cartProducts[index].quantity = inputValue;
+                const indexOfItemToUpdate = cartProducts.findIndex(x => x.id === productId && x.selectedColor === productColor); // find the product to update via its id and color
+
+                cartProducts[indexOfItemToUpdate].quantity = inputValue;
                 
                 updateLocalStorage();
                 calculateTotalQuantity();
