@@ -159,6 +159,8 @@ function displayEmptyCartMsg() {
 function listenToOrderButton() {
     orderButton = document.querySelector("#order");
     
+    checkFormInputs();
+
     orderButton.addEventListener('click', (e) => {
         e.preventDefault();
 
@@ -194,6 +196,49 @@ function listenToOrderButton() {
         else {
             alert('Votre panier est vide');
         }
+    });
+}
+
+function checkFormInputs() {
+    const inputs = document.querySelectorAll('input');
+
+    const firstNameRegex = /^[a-zA-Z._-À-ÖØ-öø-ÿ\s]{3,}$/;
+    const adressRegex = /^[a-zA-Z-0-9À-ÖØ-öø-ÿ._\s]{3,}$/;
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+    const firtNameErrorMsg = document.querySelector('#firstNameErrorMsg');
+    const lastNameErrorMsg = document.querySelector('#lastNameErrorMsg');
+    const addressErrorMsg = document.querySelector('#addressErrorMsg');
+    const cityErrorMsg = document.querySelector('#cityErrorMsg');
+    const emailErrorMsg = document.querySelector('#emailErrorMsg');
+
+
+    inputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+            e.preventDefault();
+
+            switch (e.target.name) {
+                case 'firstName':
+                    !firstNameRegex.test(e.target.value) ? firtNameErrorMsg.innerHTML = 'Veuillez entrer un prénom valide' : firtNameErrorMsg.innerHTML = '';
+
+                    break;
+                case 'lastName':
+                    !firstNameRegex.test(e.target.value) ? lastNameErrorMsg.innerHTML = 'Veuillez entrer un nom valide' : lastNameErrorMsg.innerHTML = '';
+
+                    break;
+                case 'address':
+                    !adressRegex.test(e.target.value) ? addressErrorMsg.innerHTML = 'Veuillez entrer une adresse valide' : addressErrorMsg.innerHTML = '';
+
+                    break;
+                case 'city':
+                    !firstNameRegex.test(e.target.value) ? cityErrorMsg.innerHTML = 'Veuillez entrer une ville valide' : cityErrorMsg.innerHTML = '';
+
+                    break;
+                case 'email':
+                    !emailRegex.test(e.target.value) ? emailErrorMsg.innerHTML = 'Veuillez entrer une adresse email valide' : emailErrorMsg.innerHTML = '';
+                    break;
+            }
+        });
     });
 }
 
