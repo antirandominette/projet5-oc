@@ -10,9 +10,9 @@ const itemPrice = document.querySelector('#price');
 const itemDescription = document.querySelector('#description');
 const itemColorSelector = document.querySelector('#colors');
 const itemQuantityInput = document.querySelector('#quantity');
-const confirmationMsgContainer = document.createElement('div');
-const defaultStyle = "position: absolute; padding: 0 10px; top: 110%; background: transparent; width: fit-content; height: fit-content; opacity: 0; transition: opacity 0.5s ease-in-out;";
-const confirmationMsg = document.createElement('p');
+const addItemMsgContainer = document.createElement('div');
+const addItemContainerDefaultStyle = "position: absolute; padding: 0 10px; top: 110%; background: transparent; width: fit-content; height: fit-content; opacity: 0; transition: opacity 0.5s ease-in-out; text-align: center;";
+const addItemMsg = document.createElement('p');
 
 function getItemId (){ // getting item id from url
     const url = window.location.search;
@@ -142,10 +142,11 @@ function addQuantity(i, cartProducts) { // adding quantity to product in cart
         cartProducts[i].quantity = parseInt(cartProducts[i].quantity) + parseInt(itemQuantityInput.value);
     
         localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
-        displayConfirmationMsg();
+        displayConfirmationMsg(i, cartProducts);
     }
     else {
         console.log(`quantity limit reached, you are trying to add : ${inputQuantity}`);
+        displayTooMuchItemsMsg(i, cartProducts);
     }
 }
 
@@ -179,29 +180,41 @@ function displayErrorMsgs() { // displaying error messages
     });
 }
 
-function createConfirmationMsg() {
+function createAddItemMsg() {
     const addButtonContainer = document.querySelector('.item__content__addButton');
 
-    confirmationMsgContainer.classList.add('confirmationMsgContainer');
-    confirmationMsgContainer.style.cssText = defaultStyle;
-    confirmationMsgContainer.appendChild(confirmationMsg);
+    addItemMsgContainer.classList.add('addItemMsgContainer');
+    addItemMsgContainer.style.cssText = addItemContainerDefaultStyle;
+    addItemMsgContainer.appendChild(addItemMsg);
     
-    addButtonContainer.appendChild(confirmationMsgContainer);
+    addButtonContainer.appendChild(addItemMsgContainer);
     addButtonContainer.style.cssText = "position: relative;";
 }
 
-function displayConfirmationMsg() {
-    confirmationMsg.innerHTML = `Vous avez ajouté ${itemQuantityInput.value} exemplaire(s) à votre panier !`;
+function displayConfirmationMsg(i, cartProducts) {
+    addItemMsg.innerHTML = `Vous avez ajouté ${itemQuantityInput.value} exemplaire(s) à votre panier !</br> Vous avez ${cartProducts[i].quantity} exemplaire(s) dans votre panier.`;
 
     setTimeout(() => {
-        confirmationMsgContainer.style.cssText = `${defaultStyle} opacity: 1;`;
+        addItemMsgContainer.style.cssText = `${addItemContainerDefaultStyle} opacity: 1;`;
 
         setTimeout(() => {
-            confirmationMsgContainer.style.cssText = `${defaultStyle} opacity: 0;`;
+            addItemMsgContainer.style.cssText = `${addItemContainerDefaultStyle} opacity: 0;`;
         }, 2000);
+    }, 100);  
+}
+
+function displayTooMuchItemsMsg(i, cartProducts) {
+    addItemMsg.innerHTML = `Ajouter ${itemQuantityInput.value} dépasserait la quantité maximale autorisée. </br> Vous avez ${cartProducts[i].quantity} exemplaire(s) dans votre panier.`;
+
+    setTimeout(() => {
+        addItemMsgContainer.style.cssText = `${addItemContainerDefaultStyle} opacity: 1;`;
+
+        setTimeout(() => {
+            addItemMsgContainer.style.cssText = `${addItemContainerDefaultStyle} opacity: 0;`;
+        }, 4000);
     }, 100);  
 }
 
 getItemId();
 displayErrorMsgs();
-createConfirmationMsg();
+createAddItemMsg();
