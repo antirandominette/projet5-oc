@@ -143,7 +143,10 @@ function listenToItemQuantityInputs(price) {
                 calculateTotalPrice(price);
             }
             else { // if the input value is not between 1 and 100, set the value to the product quantity before modification
-                e.target.value = cartProducts[index].quantity;
+                const indexOfItemToUpdate = cartProducts.findIndex(x => x.id === productId && x.selectedColor === productColor);
+
+                console.log(cartProducts[indexOfItemToUpdate])
+                e.target.value = cartProducts[indexOfItemToUpdate].quantity;
             }
 
         });
@@ -188,8 +191,9 @@ function listenToOrderButton() {
                 },
                 body: JSON.stringify({ contact, products })
             })
+            .then(res => res.json())
             .then(data => {
-                console.log(data);
+                // console.log(data);
                 window.location.replace(`confirmation.html?orderId=${data.orderId}`)
             })
         }
@@ -240,6 +244,14 @@ function checkFormInputs() {
             }
         });
     });
+
+    return         contact = {
+        firstName: document.querySelector('#firstName').value,
+        lastName: document.querySelector('#lastName').value,
+        address: document.querySelector('#address').value,
+        city: document.querySelector('#city').value,
+        email: document.querySelector('#email').value
+    }
 }
 
 getProductsFromLocalStorage();
