@@ -206,7 +206,7 @@ function listenToOrderButton() {
 function checkFormInputs() {
     const inputs = document.querySelectorAll('input');
 
-    const firstNameRegex = /^[a-zA-Z._-À-ÖØ-öø-ÿ\s]{3,}$/;
+    const firstNameRegex = /^[a-zA-Z._-À-ÖØ-öø-ÿ\s]{2,}$/;
     const adressRegex = /^[a-zA-Z-0-9À-ÖØ-öø-ÿ._\s]{3,}$/;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 
@@ -244,14 +244,6 @@ function checkFormInputs() {
             }
         });
     });
-
-    return         contact = {
-        firstName: document.querySelector('#firstName').value,
-        lastName: document.querySelector('#lastName').value,
-        address: document.querySelector('#address').value,
-        city: document.querySelector('#city').value,
-        email: document.querySelector('#email').value
-    }
 }
 
 getProductsFromLocalStorage();

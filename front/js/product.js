@@ -13,6 +13,7 @@ const itemQuantityInput = document.querySelector('#quantity');
 const addItemMsgContainer = document.createElement('div');
 const addItemContainerDefaultStyle = "position: absolute; padding: 0 10px; top: 110%; background: transparent; width: fit-content; height: fit-content; opacity: 0; transition: opacity 0.5s ease-in-out; text-align: center;";
 const addItemMsg = document.createElement('p');
+const quantityErrorMsg = document.createElement('p');
 
 function getItemId (){ // getting item id from url
     const url = window.location.search;
@@ -83,6 +84,7 @@ function listenToAddToCartButton() { // adding product to cart
         if(localStorage.getItem('cartProducts') ? addProductToCart() : createLocalStorage());
 
         itemQuantityInput.value = 1; // resetting quantity input value
+        quantityErrorMsg.style.display = 'none'; // hiding quantity error message
     });
 }
 
@@ -166,20 +168,20 @@ function displayErrorMsgs() { // displaying error messages
     const colorOptionsDiv = document.querySelector('.item__content__settings__color'); 
     const quantityInputDiv = document.querySelector('.item__content__settings__quantity');
     const colorErrorMsg = document.createElement('p'); 
-    const quantityErrorMsg = document.createElement('p');
 
     colorErrorMsg.innerHTML = `Veuillez choisir une couleur`; 
+    colorErrorMsg.style.cssText = "color: red; font-size: 1.2rem; display: block;";
     colorOptionsDiv.appendChild(colorErrorMsg);
 
     quantityErrorMsg.innerHTML = `Veuillez entrer un nombre entre 1 et 100`;
     quantityInputDiv.appendChild(quantityErrorMsg);
-    quantityErrorMsg.style.display = 'none'; // message is showing by default so we hide it
+    quantityErrorMsg.style.cssText = "color: red; font-size: 1.2rem; display: none;"; // message is showing by default so we hide it
 
     itemColorSelector.addEventListener('change', (e) => { // displaying error message if color is not selected
         ((e.target.value == '') ? colorErrorMsg.style.display = 'block': colorErrorMsg.style.display = 'none');
     });
 
-    itemQuantityInput.addEventListener('change', (e) => { // displaying error message if quantity is not between 1 and 100
+    itemQuantityInput.addEventListener('keyup', (e) => { // displaying error message if quantity is not between 1 and 100
         ((e.target.value < 1 || e.target.value > 100) ? quantityErrorMsg.style.display = 'block' : quantityErrorMsg.style.display = 'none');
     });
 }
