@@ -91,7 +91,7 @@ function listenToAddToCartButton() { // adding product to cart
 function addProductToCart() {
     let cartProducts = JSON.parse(localStorage.getItem('cartProducts')); // getting cartProducts from localStorage
     selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text; // getting selected color value
-
+    
     // checking if product is already in cart
     (cartProducts.find(x => x.id == productInfos.id && x.selectedColor == selectedColorValue) ? 
         productIsAlreadyInCart(cartProducts) 
@@ -106,30 +106,13 @@ function createLocalStorage() {
     pushCartProductToLocalStorage(cartProducts);
 }
 
-/**
- * If the product is already in the cart with the same color, add quantity to that product, else add
- * quantity to the product with the same id but different color.
- * 
- * @param cartProducts - [{id: 1, selectedColor: "red", quantity: 1}, {id: 2, selectedColor: "blue", quantity: 1}]
- * @param cartProduct - {id: 1, selectedColor: "red", quantity: 1}
- */
 function productIsAlreadyInCart(cartProducts) {
-    let i = cartProducts.findIndex(x => x.id == productInfos.id); // getting index of product in cart
-    let j = cartProducts.findIndex(x => x.selectedColor == selectedColorValue); // getting index of selectedColor in cart
-    
+    let i = cartProducts.findIndex(x => x.id == productInfos.id && x.selectedColor == selectedColorValue); // getting index of product in cartProducts
 
-    i == j ? addQuantity(i, cartProducts) : addQuantity(j, cartProducts); // checking if product is already in cart with same color and adding quantity to the right product
-    
-    console.log(`Quantity for ${cartProducts[j].id} in ${cartProducts[j].selectedColor} : ${cartProducts[j].quantity}`);
+    addQuantity(i, cartProducts);
 }
 
-/**
- * It pushes a product to the cartProducts array, which is stored in localStorage, if the quantity is
- * between 1 and 100 and if a color is selected.
- * 
- * @param cartProducts - an array of objects that contains the products that are in the cart
- * @param cartProduct - an object that contains the product that is added to the cart
- */
+
 function pushCartProductToLocalStorage(cartProducts) { 
     selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  
     const quantityValue = parseInt(itemQuantityInput.value); 
@@ -139,8 +122,7 @@ function pushCartProductToLocalStorage(cartProducts) {
         productInfos.quantity = quantityValue; 
         cartProducts.push(productInfos);
 
-        localStorage.setItem('cartProducts', JSON.stringify(cartProducts)); 
-        
+        updateLocalStorage(cartProducts);
         displayItemAddedForTheFirstTimeMsg();
     }
     else {
@@ -148,13 +130,6 @@ function pushCartProductToLocalStorage(cartProducts) {
     }
 }
 
-/**
- * If the input quantity is valid and the total quantity is between 1 and 100, then add the input
- * quantity to the product's quantity in the cart and update the local storage.
- * 
- * @param i - index of the product in the cartProducts array
- * @param cartProducts - an array of objects that contains the product information
- */
 function addQuantity(i, cartProducts) { 
     const inputQuantity = parseInt(itemQuantityInput.value);
     const totalQuantity = cartProducts[i].quantity + inputQuantity;
@@ -162,17 +137,16 @@ function addQuantity(i, cartProducts) {
     if(checkIfQuantityIsValid(inputQuantity) && (totalQuantity > 0 && totalQuantity <= 100)) { 
         cartProducts[i].quantity = parseInt(cartProducts[i].quantity) + parseInt(itemQuantityInput.value);
     
-        updateLocalStorage(i, cartProducts);
+        updateLocalStorage(cartProducts);
+        displayItemAddedMsg(i, cartProducts);
     }
     else {
         displayItemQuantityIsTooMuchMsg(i, cartProducts);
     }
 }
 
-function updateLocalStorage(i, cartProducts) {
+function updateLocalStorage(cartProducts) {
     localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
-
-    displayItemAddedMsg(i, cartProducts);
 }
 
 function checkIfQuantityIsValid(quantity) {
