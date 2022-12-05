@@ -1,6 +1,6 @@
 let itemId;
 let product;
-let storedProduct;
+let productInfos;
 let selectedColorValue;
 
 const pageTitle = document.querySelector('title');
@@ -30,7 +30,7 @@ async function displayProductData() { // displaying product data
     await fetch(`http://localhost:3000/api/products/${itemId}`) // fetching product data
     .then(res => res.json())
     .then(data => {
-        storedProduct = { // create object that will be stored in localStorage
+        productInfos = { // create object that will be stored in localStorage
             selectedColor: '',
             quantity: 0,
             id: data._id,
@@ -90,44 +90,56 @@ function listenToAddToCartButton() { // adding product to cart
 
 function addProductToCart() {
     let cartProducts = JSON.parse(localStorage.getItem('cartProducts')); // getting cartProducts from localStorage
-    let cartProduct = storedProduct; // getting product from localStorage
-    
     selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text; // getting selected color value
 
     // checking if product is already in cart
-    (cartProducts.find(x => x.id == cartProduct.id && x.selectedColor == selectedColorValue) ? 
-        productIsAlreadyInCart(cartProducts, cartProduct) 
+    (cartProducts.find(x => x.id == productInfos.id && x.selectedColor == selectedColorValue) ? 
+        productIsAlreadyInCart(cartProducts) 
         : 
-        pushCartProductToLocalStorage(cartProducts, cartProduct)
+        pushCartProductToLocalStorage(cartProducts)
     ); 
 }
 
 function createLocalStorage() {
     let cartProducts = [];
-    let cartProduct = storedProduct;
 
-    pushCartProductToLocalStorage(cartProducts, cartProduct);
+    pushCartProductToLocalStorage(cartProducts);
 }
 
-function productIsAlreadyInCart(cartProducts, cartProduct) {
-    let i = cartProducts.findIndex(x => x.id == cartProduct.id); // getting index of product in cart
+/**
+ * If the product is already in the cart with the same color, add quantity to that product, else add
+ * quantity to the product with the same id but different color.
+ * 
+ * @param cartProducts - [{id: 1, selectedColor: "red", quantity: 1}, {id: 2, selectedColor: "blue", quantity: 1}]
+ * @param cartProduct - {id: 1, selectedColor: "red", quantity: 1}
+ */
+function productIsAlreadyInCart(cartProducts) {
+    let i = cartProducts.findIndex(x => x.id == productInfos.id); // getting index of product in cart
     let j = cartProducts.findIndex(x => x.selectedColor == selectedColorValue); // getting index of selectedColor in cart
     
+
     i == j ? addQuantity(i, cartProducts) : addQuantity(j, cartProducts); // checking if product is already in cart with same color and adding quantity to the right product
     
     console.log(`Quantity for ${cartProducts[j].id} in ${cartProducts[j].selectedColor} : ${cartProducts[j].quantity}`);
 }
 
-function pushCartProductToLocalStorage(cartProducts, cartProduct) { // pushing product to cart
-    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  // getting selected color value
-    const quantityValue = parseInt(itemQuantityInput.value); // getting quantity value
+/**
+ * It pushes a product to the cartProducts array, which is stored in localStorage, if the quantity is
+ * between 1 and 100 and if a color is selected.
+ * 
+ * @param cartProducts - an array of objects that contains the products that are in the cart
+ * @param cartProduct - an object that contains the product that is added to the cart
+ */
+function pushCartProductToLocalStorage(cartProducts) { 
+    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  
+    const quantityValue = parseInt(itemQuantityInput.value); 
 
-    if(checkIfQuantityIsValid(quantityValue) && checkIfColorIsSelected(selectedColorValue)) { // checking if quantity is between 1 and 100 and if a color is selected
-        cartProduct.selectedColor = selectedColorValue; 
-        cartProduct.quantity = quantityValue; 
-        cartProducts.push(cartProduct);
+    if(checkIfQuantityIsValid(quantityValue) && checkIfColorIsSelected(selectedColorValue)) { 
+        productInfos.selectedColor = selectedColorValue; 
+        productInfos.quantity = quantityValue; 
+        cartProducts.push(productInfos);
 
-        localStorage.setItem('cartProducts', JSON.stringify(cartProducts)); // pushing product to localStorage
+        localStorage.setItem('cartProducts', JSON.stringify(cartProducts)); 
         
         displayItemAddedForTheFirstTimeMsg();
     }
@@ -136,7 +148,14 @@ function pushCartProductToLocalStorage(cartProducts, cartProduct) { // pushing p
     }
 }
 
-function addQuantity(i, cartProducts) { // adding quantity to product in cart
+/**
+ * If the input quantity is valid and the total quantity is between 1 and 100, then add the input
+ * quantity to the product's quantity in the cart and update the local storage.
+ * 
+ * @param i - index of the product in the cartProducts array
+ * @param cartProducts - an array of objects that contains the product information
+ */
+function addQuantity(i, cartProducts) { 
     const inputQuantity = parseInt(itemQuantityInput.value);
     const totalQuantity = cartProducts[i].quantity + inputQuantity;
 
@@ -164,25 +183,31 @@ function checkIfColorIsSelected(selectedColor) {
     return (selectedColor != '--SVP, choisissez une couleur --');
 }
 
-function displayErrorMsgs() { // displaying error messages
+/**
+ * If the color is not selected, display the error message, otherwise hide it. If the quantity is less
+ * than 1 or greater than 100, display the error message, otherwise hide it.
+ */
+function displayErrorMsgs() { 
     const colorOptionsDiv = document.querySelector('.item__content__settings__color'); 
     const quantityInputDiv = document.querySelector('.item__content__settings__quantity');
     const colorErrorMsg = document.createElement('p'); 
 
     colorErrorMsg.innerHTML = `Veuillez choisir une couleur`; 
-    colorErrorMsg.style.cssText = "color: red; font-size: 1.2rem; display: block;";
+    colorErrorMsg.style.cssText = "color: #fbb4cc; font-size: 1.2rem; display: block;";
     colorOptionsDiv.appendChild(colorErrorMsg);
 
     quantityErrorMsg.innerHTML = `Veuillez entrer un nombre entre 1 et 100`;
     quantityInputDiv.appendChild(quantityErrorMsg);
-    quantityErrorMsg.style.cssText = "color: red; font-size: 1.2rem; display: none;"; // message is showing by default so we hide it
+    quantityErrorMsg.style.cssText = "color: #fbb4cc; font-size: 1.2rem; display: none;"; // message is showing by default so we hide it
 
     itemColorSelector.addEventListener('change', (e) => { // displaying error message if color is not selected
         ((e.target.value == '') ? colorErrorMsg.style.display = 'block': colorErrorMsg.style.display = 'none');
     });
 
-    itemQuantityInput.addEventListener('keyup', (e) => { // displaying error message if quantity is not between 1 and 100
-        ((e.target.value < 1 || e.target.value > 100) ? quantityErrorMsg.style.display = 'block' : quantityErrorMsg.style.display = 'none');
+    ['keyup', 'change'].forEach((event) => {
+        itemQuantityInput.addEventListener(event, (element) => { 
+            ((element.target.value < 1 || element.target.value > 100) ? quantityErrorMsg.style.display = 'block' : quantityErrorMsg.style.display = 'none');
+        });
     });
 }
 
