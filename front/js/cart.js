@@ -177,7 +177,7 @@ function listenToOrderButton() {
 
         const products = [];
 
-        if(cartProducts) {
+        if(cartProducts && checkFormInputs()) {
             cartProducts.forEach(product => {
                 products.push(product.id);
             });
@@ -206,7 +206,7 @@ function listenToOrderButton() {
 function checkFormInputs() {
     const inputs = document.querySelectorAll('input');
 
-    const firstNameRegex = /^[a-zA-Z._-À-ÖØ-öø-ÿ\s]{2,}$/;
+    const namesRegex = /^[a-zA-Z._-À-ÖØ-öø-ÿ\s]{2,}$/;
     const adressRegex = /^[a-zA-Z-0-9À-ÖØ-öø-ÿ._\s]{3,}$/;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 
@@ -223,27 +223,44 @@ function checkFormInputs() {
 
             switch (e.target.name) {
                 case 'firstName':
-                    !firstNameRegex.test(e.target.value) ? firtNameErrorMsg.innerHTML = 'Veuillez entrer un prénom valide' : firtNameErrorMsg.innerHTML = '';
-
+                    !namesRegex.test(e.target.value) ? firtNameErrorMsg.innerHTML = 'Veuillez entrer un prénom valide' : firtNameErrorMsg.innerHTML = '';
+                    trimSplitStr(e.target);
                     break;
                 case 'lastName':
-                    !firstNameRegex.test(e.target.value) ? lastNameErrorMsg.innerHTML = 'Veuillez entrer un nom valide' : lastNameErrorMsg.innerHTML = '';
-
+                    !namesRegex.test(e.target.value) ? lastNameErrorMsg.innerHTML = 'Veuillez entrer un nom valide' : lastNameErrorMsg.innerHTML = '';
+                    trimSplitStr(e.target);
                     break;
                 case 'address':
                     !adressRegex.test(e.target.value) ? addressErrorMsg.innerHTML = 'Veuillez entrer une adresse valide' : addressErrorMsg.innerHTML = '';
-
+                    splitStr(e.target);
                     break;
                 case 'city':
-                    !firstNameRegex.test(e.target.value) ? cityErrorMsg.innerHTML = 'Veuillez entrer une ville valide' : cityErrorMsg.innerHTML = '';
-
+                    !namesRegex.test(e.target.value) ? cityErrorMsg.innerHTML = 'Veuillez entrer un nom de ville valide' : cityErrorMsg.innerHTML = '';
+                    splitStr(e.target);
                     break;
                 case 'email':
                     !emailRegex.test(e.target.value) ? emailErrorMsg.innerHTML = 'Veuillez entrer une adresse email valide' : emailErrorMsg.innerHTML = '';
+                    trimSplitStr(e.target);
                     break;
             }
         });
     });
+
+    return inputs[0].value && inputs[1].value && inputs[2].value && inputs[3].value && inputs[4].value;
+}
+
+function trimSplitStr(target) {
+    let str = target.value;
+    let trimmedSplittedStr = str.trim().split(/[\s,\t,\n]+/).join(' ');
+    
+    return target.value = trimmedSplittedStr;
+}
+
+function splitStr(target) {
+    let str = target.value;
+    let splittedStr = str.split(/[\s,\t,\n]+/).join(' ');
+    
+    return target.value = splittedStr;
 }
 
 getProductsFromLocalStorage();

@@ -11,9 +11,9 @@ const itemDescription = document.querySelector('#description');
 const itemColorSelector = document.querySelector('#colors');
 const itemQuantityInput = document.querySelector('#quantity');
 const addItemMsgContainer = document.createElement('div');
-const addItemContainerDefaultStyle = "position: absolute; padding: 0 10px; top: 110%; background: transparent; width: fit-content; height: fit-content; opacity: 0; transition: opacity 0.5s ease-in-out; text-align: center;";
 const addItemMsg = document.createElement('p');
 const quantityErrorMsg = document.createElement('p');
+const addItemContainerDefaultStyle = "position: absolute; padding: 0 10px; top: 110%; background: transparent; width: fit-content; height: fit-content; opacity: 0; transition: opacity 0.5s ease-in-out; text-align: center;";
 
 function getItemId (){ // getting item id from url
     const url = window.location.search;
