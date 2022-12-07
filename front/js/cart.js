@@ -37,11 +37,10 @@ function mapThroughAllProducts() {
             
             let price = item.price;
             let formattedPrice = numberFormat.format(price);
+            let index = 0;
 
-            // insertAdjacentHTML
-
-            cartItems.innerHTML += `
-                <article class="cart__item" data-id="${item._id}" data-color="${product.selectedColor}">
+            cartItems.insertAdjacentHTML('afterbegin', 
+                `<article class="cart__item" data-id="${item._id}" data-color="${product.selectedColor}">
                     <div class="cart__item__img">
                         <img src="${item.imageUrl}" alt="${item.altTxt}">
                     </div>
@@ -61,12 +60,13 @@ function mapThroughAllProducts() {
                             </div>
                         </div>
                     </div>
-                </article>
-            `;
+                </article>`
+            );
 
+            index++;
             calculateTotalPrice(price);
             calculateTotalQuantity();
-            listenToDeleteButtons(price);
+            listenToDeleteButtons(price, index);
             listenToItemQuantityInputs(price);
         })    
     : displayEmptyCartMsg()); 
@@ -92,40 +92,35 @@ function calculateTotalPrice(price) {
     cartTotalPrice.innerHTML = `${numberFormat.format(totalPrice)}`;
 }
 
-function listenToDeleteButtons(price) {
-    const deleteButtons = document.querySelectorAll('.deleteItem');
+function listenToDeleteButtons(price, index) {
+    const deleteButtons = document.querySelector(`.deleteItem:nth-of-type(${index})`);
 
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-    
-            const article = e.target.closest('article');
-            const productId = article.dataset.id;
-            const productColor = article.dataset.color;
+    deleteButtons.addEventListener('click', (e) => {
+        e.preventDefault();
 
-            // determine the product to delete via its id and color
-            const productToDelete = cartProducts.findIndex(x => x.id === productId && x.selectedColor === productColor);
-            
-            cartProducts.splice(productToDelete, 1);
-            article.remove();
-            console.log(cartProducts);
+        const article = e.target.closest('article');
+        const productId = article.dataset.id;
+        const productColor = article.dataset.color;
+        const productToDelete = cartProducts.findIndex(x => x.id === productId && x.selectedColor === productColor); // find the product to delete via its id and color
+        
+        cartProducts.splice(productToDelete, 1);
+        article.remove();
 
-            updateLocalStorage();
-            calculateTotalQuantity();
-            calculateTotalPrice(price);
+        updateLocalStorage();
+        calculateTotalQuantity();
+        calculateTotalPrice(price);
 
-            if(!localStorage.getItem('cartProducts') ? 
-                displayEmptyCartMsg() 
-                : console.log(`Il y a encore des produits dans le panier ${ cartProducts.length }`
-            ));
-        });
+        if(!localStorage.getItem('cartProducts') ? 
+            displayEmptyCartMsg() 
+            : console.log(`Il y a encore des produits dans le panier ${ cartProducts.length }`
+        ));
     });
 }
 
 function listenToItemQuantityInputs(price) {
     const itemQuantityInputs = document.querySelectorAll('.itemQuantity');
 
-    itemQuantityInputs.forEach((input, index) => { 
+    itemQuantityInputs.forEach(input => { 
         input.addEventListener('change', (e) => {
             let inputValue = parseInt(e.target.value);
 
