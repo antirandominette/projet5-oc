@@ -191,11 +191,11 @@ function listenToOrderButton() {
                 // console.log(data);
                 window.location.replace(`confirmation.html?orderId=${data.orderId}`)
             });
-            
+
             localStorage.clear();
         }
         else {
-            alert('Votre panier est vide');
+            alert("Votre panier est vide ou vous n'avez pas rempli le formulaire correctement");
         }
     });
 }
