@@ -190,7 +190,9 @@ function listenToOrderButton() {
             .then(data => {
                 // console.log(data);
                 window.location.replace(`confirmation.html?orderId=${data.orderId}`)
-            })
+            });
+            
+            localStorage.clear();
         }
         else {
             alert('Votre panier est vide');
