@@ -112,9 +112,13 @@ function productIsAlreadyInCart(cartProducts) {
     addQuantity(i, cartProducts);
 }
 
-
+/** Get the selectedColorValue, creates a variable to store the inputQuantity value.
+    Check if quantityValue is valid and if a color is selected.
+    If so, push the productInfos object to cartProducts and update localStorage.
+    If not, display an error message in console.
+ **/
 function pushCartProductToLocalStorage(cartProducts) { 
-    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text;  
+    selectedColorValue = itemColorSelector.options[itemColorSelector.selectedIndex].text; 
     const quantityValue = parseInt(itemQuantityInput.value); 
 
     if(checkIfQuantityIsValid(quantityValue) && checkIfColorIsSelected(selectedColorValue)) { 
@@ -130,6 +134,11 @@ function pushCartProductToLocalStorage(cartProducts) {
     }
 }
 
+/** Get inputQuantity value, creates a variable to store the total quantity of items.
+    Check if the inputQuantity is valid and if total quantity is between 1 and 100.
+    If so, update the quantity of the product in cartProducts and update localStorage.
+    If not, display a message to inform the user that the quantity is too much.
+**/
 function addQuantity(i, cartProducts) { 
     const inputQuantity = parseInt(itemQuantityInput.value);
     const totalQuantity = cartProducts[i].quantity + inputQuantity;
@@ -196,6 +205,12 @@ function createAddItemMsg() {
     addButtonContainer.style.cssText = "position: relative;";
 }
 
+/**
+ * If the quantity of the product is greater than 1, display the message with the quantity of the
+ * product in the cart, otherwise display the message without the quantity of the product in the cart.
+ * @param i - the index of the product in the cartProducts array
+ * @param cartProducts - the array of objects that contains the products in the cart
+ */
 function displayItemAddedMsg(i, cartProducts) {
     cartProducts[i].quantity > 1 ? addItemMsg.innerHTML = `Vous avez ajouté ${itemQuantityInput.value} exemplaire(s) à votre panier !</br> Vous avez ${cartProducts[i].quantity} exemplaire(s) dans votre panier.` : addItemMsg.innerHTML = `Vous avez ajouté ${itemQuantityInput.value} exemplaire(s) à votre panier !`;
     

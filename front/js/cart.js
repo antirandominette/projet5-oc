@@ -140,10 +140,9 @@ function listenToItemQuantityInputs(price) {
             else { // if the input value is not between 1 and 100, set the value to the product quantity before modification
                 const indexOfItemToUpdate = cartProducts.findIndex(x => x.id === productId && x.selectedColor === productColor);
 
-                console.log(cartProducts[indexOfItemToUpdate])
+                console.log(cartProducts[indexOfItemToUpdate]);
                 e.target.value = cartProducts[indexOfItemToUpdate].quantity;
             }
-
         });
     });
 }
@@ -155,7 +154,7 @@ function displayEmptyCartMsg() {
 }
 
 function listenToOrderButton() {
-    orderButton = document.querySelector("#order");
+    const orderButton = document.querySelector("#order");
     
     checkFormInputs();
 
@@ -188,7 +187,6 @@ function listenToOrderButton() {
             })
             .then(res => res.json())
             .then(data => {
-                // console.log(data);
                 window.location.replace(`confirmation.html?orderId=${data.orderId}`)
             });
 
