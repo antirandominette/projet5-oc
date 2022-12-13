@@ -1,4 +1,9 @@
 let cartProducts;
+let firstNameIsValid = false;
+let lastNameIsValid = false;
+let addressIsValid = false;
+let cityIsValid = false;
+let emailIsValid = false;
 
 const allProducts = [];
 const numberFormat = new Intl.NumberFormat('fr-FR');
@@ -6,17 +11,30 @@ const cartItems = document.querySelector('#cart__items');
 const cartTotalQuantity = document.querySelector('#totalQuantity');
 const cartTotalPrice = document.querySelector('#totalPrice');
 
+cartTotalQuantity.innerHTML = '0';
+cartTotalPrice.innerHTML = '0';
+
+/**
+ * If there are products in local storage, get them and put them in the cartProducts array.
+ */
 function getProductsFromLocalStorage() {
     cartProducts = JSON.parse(localStorage.getItem('cartProducts'));
-    console.log(cartProducts);
 }
 
+/**
+ * If the cartProducts array is empty, remove the cartProducts item from localStorage. Otherwise,
+ * update the cartProducts item in localStorage with the current cartProducts array.
+ */
 function updateLocalStorage() {
     localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
 
     if(cartProducts.length === 0 ? localStorage.removeItem('cartProducts') : null);
 }
 
+/**
+ * Get all products from the database, then push them into the allProducts array, then call the
+ * mapThroughAllProducts function.
+ */
 async function getAllProducts() {
     await fetch('http://localhost:3000/api/products')
     .then(res => res.json())
@@ -26,10 +44,13 @@ async function getAllProducts() {
         });
     });
 
-    console.log(allProducts);
     mapThroughAllProducts();
 }
 
+/**
+ * If the cartProducts array is not empty, map through it and insert the corresponding product in the
+ * cartItems div.
+ */
 function mapThroughAllProducts() {
     if(cartProducts ? 
         cartProducts.forEach(product => {
@@ -72,6 +93,10 @@ function mapThroughAllProducts() {
     : displayEmptyCartMsg()); 
 }
 
+/**
+ * The function calculates the total quantity of products in the cart and displays it in the
+ * cartTotalQuantity element.
+ */
 function calculateTotalQuantity() {
     let totalQuantity = 0;
 
@@ -82,6 +107,10 @@ function calculateTotalQuantity() {
     cartTotalQuantity.innerHTML = `${numberFormat.format(totalQuantity)}`;
 }
 
+/**
+ * It takes the price of a product and adds it to the total price of the cart.
+ * @param price - the price of the product
+ */
 function calculateTotalPrice(price) {
     let totalPrice = 0;
 
@@ -92,6 +121,13 @@ function calculateTotalPrice(price) {
     cartTotalPrice.innerHTML = `${numberFormat.format(totalPrice)}`;
 }
 
+/**
+ * Listen to the delete buttons and delete the product from the cartProducts array, the localStorage
+ * and the DOM. It also updates the total quantity and price of the cart and displays a message if
+ * the cart is empty.
+ * @param price - the price of the product
+ * @param index - the index of the product in the cartProducts array
+ */
 function listenToDeleteButtons(price, index) {
     const deleteButtons = document.querySelector(`.deleteItem:nth-of-type(${index})`);
 
@@ -103,20 +139,27 @@ function listenToDeleteButtons(price, index) {
         const productColor = article.dataset.color;
         const productToDelete = cartProducts.findIndex(x => x.id === productId && x.selectedColor === productColor); // find the product to delete via its id and color
         
-        cartProducts.splice(productToDelete, 1);
-        article.remove();
+        cartProducts.splice(productToDelete, 1); // remove the product from the cartProducts array
+        article.remove(); // remove the product from the DOM
 
         updateLocalStorage();
         calculateTotalQuantity();
         calculateTotalPrice(price);
 
-        if(!localStorage.getItem('cartProducts') ? 
+        if(!localStorage.getItem('cartProducts') ?
             displayEmptyCartMsg() 
-            : console.log(`Il y a encore des produits dans le panier ${ cartProducts.length }`
+            : 
+            console.log(`Il y a encore des produits dans le panier ${ cartProducts.length }`
         ));
     });
 }
 
+/**
+ * It listens to the quantity inputs, if the input value is between 1 and 100, it updates the quantity
+ * of the product in the cartProducts array and the localStorage. It also updates the total quantity
+ * and price of the cart. Else it displays an error message.
+ * @param price - the price of the product
+ */
 function listenToItemQuantityInputs(price) {
     const itemQuantityInputs = document.querySelectorAll('.itemQuantity');
 
@@ -147,12 +190,19 @@ function listenToItemQuantityInputs(price) {
     });
 }
 
+/**
+ * If the cart is empty, display a message to the user.
+ */
 function displayEmptyCartMsg() {
     cartItems.innerHTML = `
         <h2>Votre panier est vide</h2>
     `;
 }
 
+/**
+ * It listens to the order button, checks if the form is correctly filled and if the cart is not empty,
+ * then it sends the order to the server. Else it displays an error message.
+ */
 function listenToOrderButton() {
     const orderButton = document.querySelector("#order");
     
@@ -171,7 +221,7 @@ function listenToOrderButton() {
 
         const products = [];
 
-        if(cartProducts && checkFormInputs()) {
+        if(cartProducts.length > 0 && checkFormInputs()) {
             cartProducts.forEach(product => {
                 products.push(product.id);
             });
@@ -198,6 +248,11 @@ function listenToOrderButton() {
     });
 }
 
+/**
+ * It checks the validity of the form inputs and returns a boolean value. If the inputs are not valid,
+ * it displays an error message.
+ * @returns a boolean value.
+ */
 function checkFormInputs() {
     const inputs = document.querySelectorAll('input');
 
@@ -212,38 +267,65 @@ function checkFormInputs() {
     const emailErrorMsg = document.querySelector('#emailErrorMsg');
 
 
+
     inputs.forEach(input => {
         input.addEventListener('input', (e) => {
             e.preventDefault();
 
             switch (e.target.name) {
                 case 'firstName':
-                    !namesRegex.test(e.target.value) ? firtNameErrorMsg.innerHTML = 'Veuillez entrer un prénom valide' : firtNameErrorMsg.innerHTML = '';
+                    !namesRegex.test(e.target.value) ? 
+                        (firtNameErrorMsg.innerHTML = 'Veuillez entrer un prénom valide', firstNameIsValid = false) 
+                        : 
+                        (firtNameErrorMsg.innerHTML = '', firstNameIsValid = true);
+
                     trimSplitStr(e.target);
                     break;
                 case 'lastName':
-                    !namesRegex.test(e.target.value) ? lastNameErrorMsg.innerHTML = 'Veuillez entrer un nom valide' : lastNameErrorMsg.innerHTML = '';
+                    !namesRegex.test(e.target.value) ? 
+                        (lastNameErrorMsg.innerHTML = 'Veuillez entrer un nom valide', lastNameIsValid = false) 
+                        : 
+                        (lastNameErrorMsg.innerHTML = '', lastNameIsValid = true);
+
                     trimSplitStr(e.target);
                     break;
                 case 'address':
-                    !adressRegex.test(e.target.value) ? addressErrorMsg.innerHTML = 'Veuillez entrer une adresse valide' : addressErrorMsg.innerHTML = '';
+                    !adressRegex.test(e.target.value) ?
+                        (addressErrorMsg.innerHTML = 'Veuillez entrer une adresse valide', addressIsValid = false)
+                        :
+                        (addressErrorMsg.innerHTML = '', addressIsValid = true);
+
                     splitStr(e.target);
                     break;
                 case 'city':
-                    !namesRegex.test(e.target.value) ? cityErrorMsg.innerHTML = 'Veuillez entrer un nom de ville valide' : cityErrorMsg.innerHTML = '';
+                    !namesRegex.test(e.target.value) ?
+                        (cityErrorMsg.innerHTML = 'Veuillez entrer une ville valide', cityIsValid = false)
+                        :
+                        (cityErrorMsg.innerHTML = '', cityIsValid = true);
+
                     splitStr(e.target);
                     break;
                 case 'email':
-                    !emailRegex.test(e.target.value) ? emailErrorMsg.innerHTML = 'Veuillez entrer une adresse email valide' : emailErrorMsg.innerHTML = '';
+                    !emailRegex.test(e.target.value) ?
+                        (emailErrorMsg.innerHTML = 'Veuillez entrer une adresse email valide', emailIsValid = false)
+                        :
+                        (emailErrorMsg.innerHTML = '', emailIsValid = true);
+
                     trimSplitStr(e.target);
                     break;
             }
         });
     });
 
-    return inputs[0].value && inputs[1].value && inputs[2].value && inputs[3].value && inputs[4].value;
+
+    return firstNameIsValid && lastNameIsValid && addressIsValid && cityIsValid && emailIsValid;
 }
 
+/**
+ * It takes a string, trims it, splits it, and joins it back together.
+ * @param target - the target element: input 
+ * @returns The return value is the value of the target.value.
+ */
 function trimSplitStr(target) {
     let str = target.value;
     let trimmedSplittedStr = str.trim().split(/[\s,\t,\n]+/).join(' ');
@@ -251,6 +333,11 @@ function trimSplitStr(target) {
     return target.value = trimmedSplittedStr;
 }
 
+/**
+ * It takes a string and splits it then joins it back together.
+ * @param target - the target element: input
+ * @returns The return value is the value of the target.value.
+ */
 function splitStr(target) {
     let str = target.value;
     let splittedStr = str.split(/[\s,\t,\n]+/).join(' ');
